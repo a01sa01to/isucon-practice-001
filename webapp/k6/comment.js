@@ -1,9 +1,10 @@
 import http from "k6/http";
-import { BaseUrl, Username, Password } from "./config.js";
+import { BaseUrl, getRandomAccount } from "./config.js";
 import { check } from "k6";
 import { parseHTML } from "k6/html";
 
 export default function () {
+  const [Username, Password] = getRandomAccount();
   const loginRes = http.post(`${BaseUrl}/login`, {
     account_name: Username,
     password: Password,
