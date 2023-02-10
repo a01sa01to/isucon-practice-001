@@ -1,7 +1,6 @@
 import http from "k6/http";
-
-const BaseUrl = "http://localhost:80";
+import { BaseUrl } from "./config.js";
 
 export default function () {
-  http.get(BaseUrl + "/");
+  http.get(BaseUrl);
 }
