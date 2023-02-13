@@ -190,8 +190,22 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			return nil, err
 		}
 
-		for i := 0; i < len(comments); i++ {
-			err := db.Get(&comments[i].User, "SELECT * FROM `users` WHERE `id` = ?", comments[i].UserID)
+		var users []User
+		if len(comments) > 0 {
+			user_ids := make([]int, len(comments))
+
+			for i, c := range comments {
+				user_ids[i] = c.UserID
+			}
+
+			sql := "SELECT * FROM `users` WHERE `id` IN (?)"
+			query, params, err := sqlx.In(sql, user_ids)
+
+			if err != nil {
+				return nil, err
+			}
+
+			err = db.Select(&users, query, params...)
 			if err != nil {
 				return nil, err
 			}
