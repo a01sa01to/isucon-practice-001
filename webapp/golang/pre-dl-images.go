@@ -31,28 +31,28 @@ func initImage(db *sqlx.DB) {
 	}
 
 	// get file list
-	imageIds := []int{}
+	imageIds := []int64{}
 	files, err := os.ReadDir("../public/image")
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-		filename := file.Name()
-		id, err := strconv.Atoi(strings.Split(filename, ".")[0])
-		if err != nil {
-			log.Fatal(err)
-		}
+	for _, v := range _imageIds {
 		alreadyExists := false
-		for _, v := range _imageIds {
+		for _, file := range files {
+			if file.IsDir() {
+				continue
+			}
+			filename := file.Name()
+			id, err := strconv.Atoi(strings.Split(filename, ".")[0])
+			if err != nil {
+				log.Fatal(err)
+			}
 			if v == id {
 				alreadyExists = true
 			}
 		}
 		if !alreadyExists {
-			imageIds = append(imageIds, id)
+			imageIds = append(imageIds, int64(v))
 		}
 	}
 
@@ -60,19 +60,20 @@ func initImage(db *sqlx.DB) {
 		fmt.Println("No image to download")
 		return
 	}
-	fmt.Println("Image DL: ", len(imageIds), "images to download")
 
 	imageDLParallel(imageIds)
 }
 
-func imageDLParallel(imageIds []int) {
+func imageDLParallel(imageIds []int64) {
+	fmt.Println("Image DL: ", len(imageIds), "images to download")
+
 	// 非同期的にする、同時は10個まで
 	var wg sync.WaitGroup
 	var s = semaphore.NewWeighted(10)
 	cnt := 0
 	for _, u := range imageIds {
 		wg.Add(1)
-		go func(postId int) {
+		go func(postId int64) {
 			defer wg.Done()
 			if err := s.Acquire(context.Background(), 1); err != nil {
 				log.Fatal(err)

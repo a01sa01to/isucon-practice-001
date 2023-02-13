@@ -681,6 +681,8 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	imageDLParallel([]int64{pid})
+
 	http.Redirect(w, r, "/posts/"+strconv.FormatInt(pid, 10), http.StatusFound)
 }
 
@@ -820,6 +822,7 @@ func main() {
 	r := chi.NewRouter()
 
 	initImage(db)
+	fmt.Println("initImage done")
 
 	r.Get("/initialize", getInitialize)
 	r.Get("/login", getLogin)
