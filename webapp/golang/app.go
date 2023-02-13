@@ -22,6 +22,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/profile"
 )
 
 var (
@@ -816,10 +817,15 @@ func ConnectDB() *sqlx.DB {
 }
 
 func main() {
+	defer profile.Start().Stop()
+	fmt.Println("Started main")
+
 	db := ConnectDB()
 	defer db.Close()
+	fmt.Println("ConnectDB done")
 
 	r := chi.NewRouter()
+	fmt.Println("NewRouter done")
 
 	initImage(db)
 	fmt.Println("initImage done")
