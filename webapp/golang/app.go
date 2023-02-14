@@ -22,7 +22,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/profile"
 )
 
 var (
@@ -817,7 +816,7 @@ func ConnectDB() *sqlx.DB {
 }
 
 func main() {
-	defer profile.Start().Stop()
+	// defer profile.Start().Stop()
 	fmt.Println("Started main")
 
 	db := ConnectDB()
