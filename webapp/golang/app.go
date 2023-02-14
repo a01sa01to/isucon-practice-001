@@ -826,7 +826,7 @@ func main() {
 	r := chi.NewRouter()
 	fmt.Println("NewRouter done")
 
-	initImage(db)
+	go initImage(db)
 	fmt.Println("initImage done")
 
 	r.Get("/initialize", getInitialize)
