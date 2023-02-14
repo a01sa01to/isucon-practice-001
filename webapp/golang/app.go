@@ -175,29 +175,36 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	var posts []Post
 
 	for _, p := range results {
-		query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC"
+		query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` ASC"
 		if !allComments {
-			query += " LIMIT 3"
+			query = "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC LIMIT 3"
 			err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
 			if err != nil {
 				return nil, err
 			}
 		}
-		var comments []Comment
-		err := db.Select(&comments, query, p.ID)
+		err := db.Select(&p.Comments, query, p.ID)
 		if err != nil {
 			return nil, err
 		}
 
 		if allComments {
-			p.CommentCount = len(comments)
+			p.CommentCount = len(p.Comments)
+		} else {
+			// どうせ3件以下なのでswapしちゃう
+			switch len(p.Comments) {
+			case 3:
+				p.Comments[0], p.Comments[2] = p.Comments[2], p.Comments[0]
+			case 2:
+				p.Comments[0], p.Comments[1] = p.Comments[1], p.Comments[0]
+			}
 		}
 
 		var users []User
-		if len(comments) > 0 {
-			user_ids := make([]int, len(comments))
+		if len(p.Comments) > 0 {
+			user_ids := make([]int, len(p.Comments))
 
-			for i, c := range comments {
+			for i, c := range p.Comments {
 				user_ids[i] = c.UserID
 			}
 
@@ -213,13 +220,6 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 				return nil, err
 			}
 		}
-
-		// reverse
-		for i, j := 0, len(comments)-1; i < j; i, j = i+1, j-1 {
-			comments[i], comments[j] = comments[j], comments[i]
-		}
-
-		p.Comments = comments
 
 		err = db.Get(&p.User, "SELECT * FROM `users` WHERE `id` = ?", p.UserID)
 		if err != nil {
