@@ -778,7 +778,7 @@ func postAdminBanned(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/banned", http.StatusFound)
 }
 
-func ConnectDB() *sqlx.DB {
+func ConnectDB() {
 	host := os.Getenv("ISUCONP_DB_HOST")
 	if host == "" {
 		host = "localhost"
@@ -814,22 +814,20 @@ func ConnectDB() *sqlx.DB {
 	if err != nil {
 		log.Fatalf("Failed to connect to DB: %s.", err.Error())
 	}
-
-	return db
 }
 
 func main() {
 	// defer profile.Start().Stop()
 	fmt.Println("Started main")
 
-	db := ConnectDB()
+	ConnectDB()
 	defer db.Close()
 	fmt.Println("ConnectDB done")
 
 	r := chi.NewRouter()
 	fmt.Println("NewRouter done")
 
-	go initImage(db)
+	go initImage()
 	fmt.Println("initImage done")
 
 	r.Get("/initialize", getInitialize)

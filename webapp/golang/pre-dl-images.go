@@ -10,11 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"golang.org/x/sync/semaphore"
 )
 
-func initImage(db *sqlx.DB) {
+func initImage() {
 	if _, err := os.Stat("../public/image"); os.IsNotExist(err) {
 		os.Mkdir("../public/image", 0777)
 	}
